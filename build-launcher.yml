@@ -1,0 +1,35 @@
+name: Build Launcher EXE
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish EXE
+        run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o output
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: launcher-exe
+          path: output/*.exe
